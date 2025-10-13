@@ -1,0 +1,42 @@
+[
+    {
+        "group": "visual",
+        "key": "seed_color",
+        "value": "blue",
+        "type_str": "str",
+        "control": "Dropdown",
+        "init_params": "[{\"key\": \"WHITE\", \"icon\": {\"name\": \"palette\", \"color\": \"WHITE\"}}, {\"key\": \"RED\", \"icon\": {\"name\": \"palette\", \"color\": \"RED\"}}, {\"key\": \"PINK\", \"icon\": {\"name\": \"palette\", \"color\": \"PINK\"}}, {\"key\": \"PURPLE\", \"icon\": {\"name\": \"palette\", \"color\": \"PURPLE\"}}, {\"key\": \"DEEPPURPLE\", \"icon\": {\"name\": \"palette\", \"color\": \"DEEPPURPLE\"}}, {\"key\": \"INDIGO\", \"icon\": {\"name\": \"palette\", \"color\": \"INDIGO\"}}, {\"key\": \"BLUE\", \"icon\": {\"name\": \"palette\", \"color\": \"BLUE\"}}, {\"key\": \"LIGHTBLUE\", \"icon\": {\"name\": \"palette\", \"color\": \"LIGHTBLUE\"}}, {\"key\": \"CYAN\", \"icon\": {\"name\": \"palette\", \"color\": \"CYAN\"}}, {\"key\": \"TEAL\", \"icon\": {\"name\": \"palette\", \"color\": \"TEAL\"}}, {\"key\": \"GREEN\", \"icon\": {\"name\": \"palette\", \"color\": \"GREEN\"}}, {\"key\": \"LIGHTGREEN\", \"icon\": {\"name\": \"palette\", \"color\": \"LIGHTGREEN\"}}, {\"key\": \"LIME\", \"icon\": {\"name\": \"palette\", \"color\": \"LIME\"}}, {\"key\": \"YELLOW\", \"icon\": {\"name\": \"palette\", \"color\": \"YELLOW\"}}, {\"key\": \"AMBER\", \"icon\": {\"name\": \"palette\", \"color\": \"AMBER\"}}, {\"key\": \"ORANGE\", \"icon\": {\"name\": \"palette\", \"color\": \"ORANGE\"}}, {\"key\": \"DEEPORANGE\", \"icon\": {\"name\": \"palette\", \"color\": \"DEEPORANGE\"}}, {\"key\": \"BROWN\", \"icon\": {\"name\": \"palette\", \"color\": \"BROWN\"}}, {\"key\": \"BLUEGREY\", \"icon\": {\"name\": \"palette\", \"color\": \"BLUEGREY\"}}, {\"key\": \"REDACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"REDACCENT\"}}, {\"key\": \"PINKACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"PINKACCENT\"}}, {\"key\": \"PURPLEACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"PURPLEACCENT\"}}, {\"key\": \"DEEPPURPLEACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"DEEPPURPLEACCENT\"}}, {\"key\": \"INDIGOACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"INDIGOACCENT\"}}, {\"key\": \"BLUEACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"BLUEACCENT\"}}, {\"key\": \"LIGHTBLUEACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"LIGHTBLUEACCENT\"}}, {\"key\": \"CYANACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"CYANACCENT\"}}, {\"key\": \"TEALACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"TEALACCENT\"}}, {\"key\": \"GREENACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"GREENACCENT\"}}, {\"key\": \"LIGHTGREENACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"LIGHTGREENACCENT\"}}, {\"key\": \"LIMEACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"LIMEACCENT\"}}, {\"key\": \"YELLOWACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"YELLOWACCENT\"}}, {\"key\": \"AMBERACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"AMBERACCENT\"}}, {\"key\": \"ORANGEACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"ORANGEACCENT\"}}, {\"key\": \"DEEPORANGEACCENT\", \"icon\": {\"name\": \"palette\", \"color\": \"DEEPORANGEACCENT\"}}, {\"key\": \"GREY\", \"icon\": {\"name\": \"palette\", \"color\": \"GREY\"}}]"
+    },
+    {
+        "group": "visual",
+        "key": "theme",
+        "value": "system",
+        "type_str": "str",
+        "control": "Dropdown",
+        "init_params": "[{\"key\": \"system\", \"icon\": {\"name\": \"auto_mode\"}}, {\"key\": \"light\", \"icon\": {\"name\": \"light_mode\"}}, {\"key\": \"dark\", \"icon\": {\"name\": \"dark_mode\"}}]"
+    },
+    {
+        "group": "visual",
+        "key": "animations_duration",
+        "value": "300",
+        "type_str": "int",
+        "control": "TextField",
+        "init_params": "{\"width\": 150}"
+    },
+    {
+        "group": "notifications",
+        "key": "min_notification_duration",
+        "value": "4",
+        "type_str": "int",
+        "control": "TextField",
+        "init_params": "{\"width\": 150}"
+    },
+    {
+        "group": "notifications",
+        "key": "max_notification_duration",
+        "value": "-1",
+        "type_str": "int",
+        "control": "TextField",
+        "init_params": "{\"width\": 150}"
+    }
+]

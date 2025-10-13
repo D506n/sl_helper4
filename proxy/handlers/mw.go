@@ -1,0 +1,15 @@
+package handlers
+
+import (
+	"net/http"
+	"log"
+)
+
+func LoggingMiddleware(LogLevel string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if LogLevel == "debug" {
+			log.Printf("%s %s", r.Method, r.URL.Path)
+		}
+		next.ServeHTTP(w, r)
+	})
+}

@@ -1,20 +1,37 @@
 from pathlib import Path
 from importlib import import_module
-from logging import getLogger
+from logging import getLogger, Logger
 from .shared.settings import SettingsProvider
 from .utils.singleton import singleton
-from .shared.plug_lib import AbstractPlugin, PluginUI
+from nicegui import ui
+from .events import PubSub
 
 logger = getLogger(__name__)
 
-class AbstractLibrary(AbstractPlugin):
-    IS_LIB = True
+class AbstractPlugin:
+    logger: Logger
+
+    @staticmethod
+    def build_page(settings: SettingsProvider, pubsub: PubSub) -> tuple[str, ui.page]:
+        raise NotImplementedError()
+
+    @staticmethod
+    async def build_sidebar_btn(settings: SettingsProvider):
+        raise NotImplementedError()
+
+class AbstractLibrary:
+    logger: Logger
+
+    @staticmethod
+    async def main(*args, **kwargs):
+        raise NotImplementedError()
 
 @singleton
 class Loader():
-    def __init__(self):
-        self.settings = SettingsProvider.get()
-        self.plugins: dict[str, PluginUI] = {}
+    def __init__(self, settings: SettingsProvider=None):
+        '''Синглтон. Параметр settings нужен только при инициализации класса, при последующих вызовах не требуется.'''
+        self.settings = settings
+        self.plugins: dict[str, AbstractPlugin] = {}
         self.libs: dict[str, AbstractLibrary] = {}
         self.plugins_cache: set[str] = set()
 
@@ -43,14 +60,16 @@ class Loader():
             logger.error("Plugin %s has no main.py file", plugin_path.name)
             return
         logger.debug("Registering plugin %s", plugin_path)
-        module: AbstractPlugin|AbstractLibrary = import_module(f"src.plugins.{plugin_path.name}.main")
-        if hasattr(module, "IS_LIB") and module.IS_LIB:
+        module: AbstractPlugin = import_module(f"src.plugins.{plugin_path.name}.main")
+        if not hasattr(module, "build_page") and hasattr(module, "main"):
             logger.info("Registering library %s", plugin_path.name)
             self.libs[plugin_path.name] = module
             self.plugins_cache.add(plugin_path.name)
-        elif hasattr(module, "load"):
+        elif hasattr(module, "build_page") and hasattr(module, "build_sidebar_btn"):
             logger.info("Registering plugin %s", plugin_path.name)
-            self.plugins[f'/{plugin_path.name}'] = module.load()
+            self.plugins[plugin_path.name] = module
             self.plugins_cache.add(plugin_path.name)
         else:
-            logger.error("Plugin %s has no IS_LIB arg or load method", plugin_path.name)
+            logger.error("Plugin %s has no build_page and build_sidebar_btn methods or main method", plugin_path.name)
+            raise Exception(f"Plugin {plugin_path.name} has no build_page and build_sidebar_btn methods or main method")
+        self.settings.register_plugin(plugin_path.name)
