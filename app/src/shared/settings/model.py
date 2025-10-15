@@ -47,4 +47,4 @@ class Settings(BaseModel):
     last_updated: datetime = Field(default_factory=datetime.now, description='Last updated')
 
     def hash(self) -> str:
-        return xxh3_64_hexdigest(orjson.dumps(self.model_dump(mode='json'), option=orjson.OPT_SORT_KEYS))
+        return xxh3_64_hexdigest(orjson.dumps(self.model_dump(mode='json'), option=orjson.OPT_SORT_KEYS|orjson.OPT_INDENT_2))
