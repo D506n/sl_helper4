@@ -1,7 +1,7 @@
 from pathlib import Path
 from importlib import import_module
 from logging import getLogger, Logger
-from .shared.settings import SettingsProvider
+from .shared._settings import SettingsProvider
 from .utils.singleton import singleton
 from nicegui import ui
 from .events import PubSub

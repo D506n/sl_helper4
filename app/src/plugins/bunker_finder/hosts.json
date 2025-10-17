@@ -1,0 +1,9 @@
+{
+    "base": "http://bunker-api-dot.yandex.net",
+    "ver": "/v2",
+    "node": "get_node",
+    "node_list": "get_node_list",
+    "node_tree": "get_node_tree",
+    "project": "/dwh",
+    "path": "/prod/reputter"
+}
