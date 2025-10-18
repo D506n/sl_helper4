@@ -1,10 +1,11 @@
 from ...shared.plug_lib import PluginUI
 from nicegui import ui
 from functools import partial
+from ...shared.notificator import NotifyEvent
 
 class ExamplePlugin(PluginUI):
-    def __init__(self, url:str):
-        super().__init__(url)
+    def __init__(self, url:str, notify: NotifyEvent):
+        super().__init__(url, notify)
         self.count = 0
         self.counter:ui.label = None
 
@@ -22,6 +23,3 @@ class ExamplePlugin(PluginUI):
 
 def load():
     return ExamplePlugin
-
-def sidebar_btn():
-    return ExamplePlugin.sidebar_btn()
