@@ -13,6 +13,8 @@ from .src.script import main
 import os
 import asyncio
 import platform
+from ...shared.plug_lib import PluginUI
+from nicegui import Event
 
 logger = getLogger(__name__)
 
