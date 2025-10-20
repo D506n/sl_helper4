@@ -53,6 +53,4 @@ class Loader():
             self.plugins[f'/{plugin_path.name}'] = module.load()
             self.plugins_cache.add(plugin_path.name)
         else:
-            logger.error("Plugin %s has no build_page and build_sidebar_btn methods or main method", plugin_path.name)
-            raise Exception(f"Plugin {plugin_path.name} has no build_page and build_sidebar_btn methods or main method")
-        # self.settings.register_plugin(plugin_path.name)
+            logger.error("Plugin %s has no IS_LIB arg or load method", plugin_path.name)
