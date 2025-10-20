@@ -1,0 +1,20 @@
+[project]
+name = "sl-helper-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aioconsole>=0.8.1",
+    "aiofiles>=24.1.0",
+    "aiosqlite>=0.21.0",
+    "fastapi>=0.116.1",
+    "httpx[http2]>=0.28.1",
+    "nicegui>=3.0.4",
+    "openpyxl>=3.1.5",
+    "orjson>=3.11.1",
+    "pyperclip>=1.9.0",
+    "pyyaml>=6.0.2",
+    "uvicorn>=0.35.0",
+    "xxhash>=3.5.0",
+]

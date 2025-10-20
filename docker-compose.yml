@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: python-app
+    container_name: python-app
+    volumes:
+      - ./app/data:/app/data
+      - ./app/src/plugins:/app/src/plugins
+    networks:
+      - app-network
+
+  go-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: go-proxy
+    container_name: go-proxy
+    ports:
+      - 8506:3000
+    depends_on:
+      - python-app
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
