@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+.venv/
+.env
+.idea/
+.vscode/
+*.egg-info/
+dist/
+build/
+*.sqlite3
+*.db
+*.csv
+*.xlsx
+data.json
+*.exe
+update_cache
+hosts.json
+
+# Node/React
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+.eslintcache
+.next/
+out/
+.cache/
+
+# Общие
+*.log
+*.swp
+*.swo
+*~
+*#
+.~*
+*#
+appdata.json
