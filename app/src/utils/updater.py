@@ -1,19 +1,30 @@
 from pathlib import Path
-from xxhash import xxh3_64_hexdigest
+from xxhash import xxh3_128_hexdigest
 import json
+from httpx import AsyncClient
+# from ..shared.lib.logging.formatters import ColoredConsoleFormatter, MonocolorFormatter
+# from ..shared.lib.logging.handlers import AsyncConsoleHandler, AsyncFileHandler
+# import asyncio
+
+APP_PATH = Path(__file__).parent.parent.parent
 
 class Updater():
     def __init__(self, app_path:Path=None, cache_path:Path=None, updates_url:str=None):
         self.app_path = app_path or self.get_app_path()
         self.cache_path = cache_path or self.app_path/'data/update_cache'
         self.updates_url = updates_url or 'https://github.com/D506n/sl_helper4/releases/download/latest/update_cache.json'
+        self.client = AsyncClient()
 
     def get_app_path(self):
         return Path(__file__).parent.parent.parent
 
     def get_file_hash(self, file_path: Path) -> str:
         with open(file_path, 'rb') as f:
-            return xxh3_64_hexdigest(f.read())
+            return xxh3_128_hexdigest(f.read())
+
+def get_file_hash(file_path: Path) -> str:
+    with open(file_path, 'rb') as f:
+        return xxh3_128_hexdigest(f.read())
 
 def scan_dir(root:Path, cache:dict[str, str], fmts:set[str], exclude:set[str]) -> dict[str, str]:
     if not isinstance(exclude, set):
@@ -29,7 +40,7 @@ def scan_dir(root:Path, cache:dict[str, str], fmts:set[str], exclude:set[str]) -
             continue
         h = get_file_hash(path)
         if h != cache.get(path.name, None):
-            cache[str(path)] = h
+            cache[str(path).lower().replace(str(APP_PATH).lower(), 'app')] = h
     return cache
 
 def work_dir(path:Path, cache_path:Path, fmts:set[str], exclude:set[str]):
@@ -64,5 +75,5 @@ def main():
     return result
 
 if __name__ == "__main__":
-    # with open('test.json', 'w', encoding='utf-8') as f:
-    #     json.dump(main(), f, ensure_ascii=False, indent=4)
+    with open('test.json', 'w', encoding='utf-8') as f:
+        json.dump(main(), f, ensure_ascii=False, indent=4)
