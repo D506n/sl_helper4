@@ -39,12 +39,25 @@ if CONSOLE_ARGS.raw_logs:
     console_fmt = ColoredConsoleFormatter(fmt=fmt, no_cut=True, custom_colors=custom_colors)
     file_fmt = MonocolorFormatter(fmt=fmt, no_cut=True)
 else:
-    setup_root_logger(formatter=ColoredFormatter(), level=CONSOLE_ARGS.log_level.upper())
+    console_fmt = ColoredConsoleFormatter(fmt=fmt, custom_colors=custom_colors)
+    file_fmt = MonocolorFormatter(fmt=fmt)
 
-settings = SettingsProvider(CONSOLE_ARGS.config, CONSOLE_ARGS.plugins_path)
-loader = Loader(settings)
-loader.load_plugins()
-app_layout(loader)
+async def startup():
+    root_logger = getLogger()
+    root_logger.setLevel(CONSOLE_ARGS.log_level.upper())
+    console_handler = AsyncConsoleHandler()
+    console_handler.setLevel(root_logger.level)
+    console_handler.setFormatter(console_fmt)
+    root_logger.addHandler(console_handler)
+    file_handler = AsyncFileHandler(LOGS_PATH / "log.log", max_bytes=1024*1024*5, on_expire='compress')
+    file_handler.setLevel(root_logger.level)
+    file_handler.setFormatter(file_fmt)
+    root_logger.addHandler(file_handler)
+
+    SettingsProvider(CONSOLE_ARGS.config, CONSOLE_ARGS.plugins_path)
+    loader = Loader()
+    loader.load_plugins()
+    app_layout(loader)
 
 logger = getLogger('http')
 
