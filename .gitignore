@@ -20,7 +20,9 @@ data.json
 *.exe
 update_cache
 hosts.json
-*bunker_finder/
+bunker_finder/
+**/plugins/_*
+!**/plugins/__init__.py
 
 # Node/React
 node_modules/
