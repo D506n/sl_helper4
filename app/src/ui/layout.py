@@ -16,7 +16,7 @@ def app_layout(loader: Loader) -> None:
     async def main_layout():
         settings = SettingsProvider.get()
         dm = ui.dark_mode(settings.ui.dark_mode)
-        notif = Notificator()
+        notif = Notificator(ui.context.client.id)
         btns = [partial(sidebar_btn, p.url, p.icon, p.label) for p in settings.plugins.values() if p.url in loader.plugins.keys()]
         pages = {}
         for k, v in loader.plugins.items():
