@@ -33,7 +33,7 @@ CONSOLE_ARGS = parser.parse_args()
 if CONSOLE_ARGS.dev_mode:
     CONSOLE_ARGS.log_level = "debug"
     CONSOLE_ARGS.raw_logs = True
-custom_colors={'filename': Fore.YELLOW, 'status': {'400': Fore.RED, '500': Fore.RED, '200': Fore.GREEN, '300': Fore.YELLOW}}
+custom_colors={'filename': Fore.YELLOW}
 fmt = '[%(levelname)8s|%(asctime)s|%(name)20s:%(lineno)3s] %(message)s'
 if CONSOLE_ARGS.raw_logs:
     console_fmt = ColoredConsoleFormatter(fmt=fmt, no_cut=True, custom_colors=custom_colors)
