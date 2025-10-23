@@ -35,6 +35,7 @@ class CommonSettings(SettingsItem):
     def build(self):
         with self:
             ui.label('Общие настройки').classes('text-h5')
+            ui.splitter(horizontal=True)
             ui.label('Тема').classes('text-h6')
             ui.input('Основной цвет', value=self.settings.ui.seed_color, on_change=self.dd_change)
             with ui.row():
