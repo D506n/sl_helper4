@@ -104,6 +104,11 @@ def main(text:str,
         joiner = ', '
     elif joiner.lower() in ['none', 'null']:
         joiner = ''
+    try:
+        joiner = joiner.encode().decode('unicode-escape')
+    except:
+        notify_callback('Не удалось корректно обработать соединитель. Использовано значение по умолчанию.')
+        joiner = ', '
     res_count = len(result)
     notify_callback(f'Обработано строк: {res_count}')
     result = joiner.join(result)
