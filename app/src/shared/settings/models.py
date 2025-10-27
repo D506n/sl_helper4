@@ -5,6 +5,7 @@ import orjson
 from xxhash import xxh3_64_hexdigest
 from importlib import import_module
 from logging import getLogger
+from typing import Self
 
 logger = getLogger(__file__)
 
@@ -15,7 +16,7 @@ class PluginSettingsModel(BaseModel):
     label: str = Field('Plugin')
 
     @classmethod
-    def from_file(cls, file_path: Path) -> 'PluginSettingsModel':
+    def from_file(cls, file_path: Path) -> Self:
         if not file_path.exists():
             raise FileNotFoundError('Settings file not found')
         data = orjson.loads(file_path.read_text('utf-8'))
