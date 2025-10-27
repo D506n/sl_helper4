@@ -13,6 +13,7 @@ from src.service import service_router
 from src.service.health import health_check
 import colorama
 from colorama import Fore
+from src.shared.lib.logging.filters import ProactorBasePipeTransportFilter
 
 colorama.init(autoreset=True)
 
@@ -48,10 +49,12 @@ async def startup():
     console_handler = AsyncConsoleHandler()
     console_handler.setLevel(root_logger.level)
     console_handler.setFormatter(console_fmt)
+    console_handler.addFilter(ProactorBasePipeTransportFilter())
     root_logger.addHandler(console_handler)
     file_handler = AsyncFileHandler(LOGS_PATH / "log.log", max_bytes=1024*1024*5, on_expire='compress')
     file_handler.setLevel(root_logger.level)
     file_handler.setFormatter(file_fmt)
+    file_handler.addFilter(ProactorBasePipeTransportFilter())
     root_logger.addHandler(file_handler)
 
     SettingsProvider(CONSOLE_ARGS.config, CONSOLE_ARGS.plugins_path)
