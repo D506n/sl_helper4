@@ -5,6 +5,7 @@ import orjson
 from xxhash import xxh3_64_hexdigest
 from importlib import import_module
 from logging import getLogger
+from typing import Self
 
 logger = getLogger(__file__)
 
@@ -15,7 +16,7 @@ class PluginSettingsModel(BaseModel):
     label: str = Field('Plugin')
 
     @classmethod
-    def from_file(cls, file_path: Path) -> 'PluginSettingsModel':
+    def from_file(cls, file_path: Path) -> Self:
         if not file_path.exists():
             raise FileNotFoundError('Settings file not found')
         data = orjson.loads(file_path.read_text('utf-8'))
@@ -27,8 +28,20 @@ class PluginSettingsModel(BaseModel):
             data['url'] = url
         return cls.model_validate(data)
 
+    def layout(self) -> ui.card:
+        pass
+
     def build_ui(self) -> ui.card:
-        raise NotImplementedError()
+        with ui.card().classes('w-full') as card:
+            ui.label(self.label).classes('text-h5')
+            ui.splitter(horizontal=True)
+            self.layout()
+        if len(card.slots['default'].children) <= 2:
+            card.delete()
+        return card
+
+    def save_to_file(self, file_path: Path):
+        file_path.write_text(self.model_dump_json(indent=2), 'utf-8')
 
 class PluginModule():
     class Settings(PluginSettingsModel):

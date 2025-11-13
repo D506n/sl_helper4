@@ -13,6 +13,7 @@ from src.service import service_router
 from src.service.health import health_check
 import colorama
 from colorama import Fore
+from src.shared.lib.logging.filters import ProactorBasePipeTransportFilter
 
 colorama.init(autoreset=True)
 
@@ -33,7 +34,7 @@ CONSOLE_ARGS = parser.parse_args()
 if CONSOLE_ARGS.dev_mode:
     CONSOLE_ARGS.log_level = "debug"
     CONSOLE_ARGS.raw_logs = True
-custom_colors={'filename': Fore.YELLOW, 'status': {'400': Fore.RED, '500': Fore.RED, '200': Fore.GREEN, '300': Fore.YELLOW}}
+custom_colors={'filename': Fore.YELLOW}
 fmt = '[%(levelname)8s|%(asctime)s|%(name)20s:%(lineno)3s] %(message)s'
 if CONSOLE_ARGS.raw_logs:
     console_fmt = ColoredConsoleFormatter(fmt=fmt, no_cut=True, custom_colors=custom_colors)
@@ -48,10 +49,12 @@ async def startup():
     console_handler = AsyncConsoleHandler()
     console_handler.setLevel(root_logger.level)
     console_handler.setFormatter(console_fmt)
+    console_handler.addFilter(ProactorBasePipeTransportFilter())
     root_logger.addHandler(console_handler)
     file_handler = AsyncFileHandler(LOGS_PATH / "log.log", max_bytes=1024*1024*5, on_expire='compress')
     file_handler.setLevel(root_logger.level)
     file_handler.setFormatter(file_fmt)
+    file_handler.addFilter(ProactorBasePipeTransportFilter())
     root_logger.addHandler(file_handler)
 
     SettingsProvider(CONSOLE_ARGS.config, CONSOLE_ARGS.plugins_path)

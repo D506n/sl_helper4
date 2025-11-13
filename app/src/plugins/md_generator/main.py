@@ -1,91 +1,78 @@
+from ...shared.plug_lib import PluginUI
+from ...shared.notificator import NotifyEvent
 from nicegui import ui
-from nicegui import events
-from ...events import PubSub, Event, RunDelayer
-from ...shared._settings.domain import SettingsProvider
-from .models import MDGenParams
-from functools import partial
-from typing import Any
-from .script import main
-import pyperclip
+from .models import Settings, TemplateModel, TemplatesListModel
+from pathlib import Path
 
-URL = '/md_generator'
+class MDServiceUI():
+    def __init__(self, templates: TemplatesListModel, notify: NotifyEvent):
+        self.templates = templates
 
-def build_change_handler(params: MDGenParams, pubsub: PubSub, *args, **kwargs):
-    async def change_handler(field:str, e:events.ValueChangeEventArguments|Any):
-        if isinstance(e, events.ValueChangeEventArguments):
-            e = e.value
-        setattr(params, field, e)
-        if field in ['del_substring', 'splitter', 'joiner', 'text']:
-            pubsub.publish('string_tool_params_changed_delayed', 'event', {'params': params})
-        else:
-            pubsub.publish('string_tool_params_changed', 'event', {'params': params})
-    return change_handler
+    def layout(self):
+        with ui.expansion('Cоздать новый шаблон'):
+            with ui.column().classes('w-full items-stretch'):
+                ui.input('Название шаблона')
+                with ui.row(wrap=False).classes('w-full'):
+                    with ui.textarea('Шаблон').classes('w-1/2').props('autogrow'):
+                        ui.tooltip('Для создания переменной в шаблоне используйте фигурные скобки. Пример: {name}')
+                    ui.markdown('##### Предпросмотр:\n\nтест').classes('w-1/2')
+                ui.input('Описание')
+                with ui.input('Разделитель'):
+                    ui.tooltip('Разделитель используется для разделения строк в переменных шаблона. Пример: \\n')
+                with ui.input('Соединитель'):
+                    ui.tooltip('Соединитель используется для соединения строк при генерации ответа. Пример: \\n')
+                ui.button('Создать')
 
-def build_run_string_tool(pubsub: PubSub):
-    async def run_string_tool(e: Event):
-        params: MDGenParams = e.ctx['payload']['params']
-        result = main(**params.model_dump(by_alias=True), notify_callback=partial(pubsub.publish, 'notify', payload={'timeout': 5000}))
-        pubsub.publish('string_tool_result', 'event', {'result': result})
-    return run_string_tool
+class MDFormBuilder():
+    def __init__(self, template: TemplateModel, notify: NotifyEvent):
+        self.template = template
+        self.notify = notify
 
-async def set_result(e: Event, result_field: ui.textarea):
-    result_field.value = e.ctx['payload']['result']
+    def layout(self):
+        with ui.row().classes('w-full'):
+            with ui.column().classes('w-full'):
+                ui.label(self.template.name).classes('text-h5')
+                for row in self.template.words:
+                    if row.startswith('{') and row.endswith('}'):
+                        name = row[1:-1]
+                        ui.textarea(name).classes('w-full').props('autogrow')
 
-async def copy_result(e: Event, result_field: ui.textarea, pubsub: PubSub):
-    if result_field.value:
-        pyperclip.copy(result_field.value)
-        pubsub.publish('notify', 'Результат скопирован в буфер обмена', {'timeout': 500, 'close_button': None})
-    else:
-        pubsub.publish('notify', 'Нечего копировать', {'timeout': 500, 'close_button': None})
+class MdGeneratorUI(PluginUI):
+    def __init__(self, url: str, notify: NotifyEvent):
+        super().__init__(url, notify)
+        self.splitter: ui.splitter = None
+        self.tabs: ui.tabs = None
+        self.tab_panels: ui.tab_panels = None
+        self.settings = Settings.from_file(Path(__file__).parent/'settings.json')
+        self.templates = TemplatesListModel.from_file(self.settings.templates_path)
+        self.template_uis = [MDFormBuilder(template, self.notify)\
+                          for template in self.templates.templates]
+        self.tabs_list: list[ui.tab] = []
+        self.tab_panels_list: list[ui.tab_panel] = []
+        self.service_ui = MDServiceUI(self.templates, self.notify)
 
-def build_page(settings: SettingsProvider, pubsub: PubSub):
-    params = MDGenParams(text='')
-    change_handler = build_change_handler(params, pubsub)
-    run_string_tool = build_run_string_tool(pubsub)
-    delayer = RunDelayer(run_string_tool, delay=0.5)
+    def layout(self):
+        with ui.splitter(value=None).classes('w-full h-full') as splitter:
+            self.splitter = splitter
+            with self.splitter.before:
+                with ui.tabs().props('vertical').classes('w-full') as tabs:
+                    self.tabs = tabs
+                    service = ui.tab('Создание/Редактирование').classes('text-justify')
+                    ui.splitter(horizontal=True)
+                    for t in self.template_uis:
+                        self.tabs_list.append(ui.tab(t.template.name))
+            with splitter.after:
+                if self.tabs_list:
+                    first = self.tabs_list[0]
+                else:
+                    first = service
+                with ui.tab_panels(tabs, value=first).props('vertical').classes('w-full h-full'):
+                    with ui.tab_panel(service).classes('w-full h-full items-stretch'):
+                        self.service_ui.layout()
+                    for i, tab in enumerate(self.tabs_list):
+                        with ui.tab_panel(tab).classes('w-full h-full items-stretch') as tab_panel:
+                            self.tab_panels_list.append(tab_panel)
+                            self.template_uis[i].layout()
 
-    @ui.page(URL)
-    async def plugin_page():
-        with ui.column().classes('w-full h-full items-center rounded-lg').style('background-color: rgba(100, 100, 100, 0.1); padding: 10px;'):
-            pass
-            # with ui.row():
-            #     ui.checkbox('Удалить дубли', on_change=partial(change_handler, 'del_dubl'))
-            #     ui.checkbox('Добавлять кавычки', on_change=partial(change_handler, 'need_quot'))
-            #     ui.checkbox('Удалить пустые строки', on_change=partial(change_handler, 'del_empty'))
-            #     with ui.dropdown_button('Сортировка', value='Без сортировки', auto_close=True):
-            #         ui.item('Без сортировки', on_click=partial(change_handler, 'order', 'Без сортировки'))
-            #         ui.item('По возрастанию', on_click=partial(change_handler, 'order', 'По возрастанию'))
-            #         ui.item('По убыванию', on_click=partial(change_handler, 'order', 'По убыванию'))
-            #     with ui.dropdown_button('как'):#, on_value_change=partial(change_handler, 'type')):
-            #         ui.item('Строки', on_click=partial(change_handler, 'type', 'Строки'))
-            #         ui.item('Числа', on_click=partial(change_handler, 'type', 'Числа'))
-            # with ui.row():
-            #     ui.checkbox('Оставить только числа', on_change=partial(change_handler, 'only_digits'))
-            #     ui.checkbox('Удалить все числа', on_change=partial(change_handler, 'del_digits'))
-            # with ui.row().classes('w-full no-wrap').style('align-items: baseline;'):
-            #     ui.input('Вырезать подстроку', on_change=partial(change_handler, 'delete_substring')).classes('w-full')
-            #     with ui.dropdown_button('Режим'):#, on_value_change=partial(change_handler, 'del_substr_mode')):
-            #         ui.item('Точное соответствие', on_click=partial(change_handler, 'del_substr_mode', 'Строго'))
-            #         ui.item('Регулярное выражение', on_click=partial(change_handler, 'del_substr_mode', 'Регулярка'))
-            # with ui.row().classes('w-full no-wrap'):
-            #     ui.input('Разделитель, по умолчанию - перенос строки', on_change=partial(change_handler, 'splitter')).classes('w-full')
-            #     ui.input('Соединитель, по умолчанию - запятая', on_change=partial(change_handler, 'joiner')).classes('w-full')
-            # with ui.row().classes('w-full no-wrap h-full'):
-            #     ui.textarea(label='Необработанный текст', on_change=partial(change_handler, 'text')).classes('w-full h-full').props('autogrow')
-            #     result_field = ui.textarea(label='Результат').classes('w-full h-full').props('autogrow')
-            #     result_field.on('click', partial(copy_result, result_field=result_field, pubsub=pubsub))
-            # pubsub.subscribe('string_tool_params_changed_delayed', delayer.got_event)
-            # pubsub.subscribe('string_tool_params_changed', run_string_tool)
-            # pubsub.subscribe('string_tool_result', partial(set_result, result_field=result_field))
-    return (URL, plugin_page,)
-
-def _sb():
-    with ui.item(on_click=lambda e: ui.navigate.to(URL)) as i:
-        with ui.item_section().props('avatar'):
-            ui.icon('difference')
-        with ui.item_section():
-            ui.item_label('Шаблонизатор')
-        return i
-
-def build_sidebar_btn():
-    return lambda: _sb()
+def load():
+    return MdGeneratorUI

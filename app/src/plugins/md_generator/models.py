@@ -1,30 +1,40 @@
-from ...shared._settings.model import PluginItemSettings
-from pydantic import BaseModel, Field, field_serializer
+from ...shared.settings.models import PluginSettingsModel
+from pydantic import BaseModel, Field
+from typing import List, Self
 from pathlib import Path
+import orjson
+from functools import cached_property
 
-class MDGenParams(BaseModel):
-    path: Path = Field(None)
-    # del_dubl: bool = Field(False, description='Удалить дубли')
-    # need_quot: bool = Field(False, description='Добавить кавычки')
-    # del_empty: bool = Field(False, description='Удалить пустые строки')
-    # joiner: str = Field(', ', description='Соединитель')
-    # splitter: str = Field('\n', description='Разделитель')
-    # order: str = Field('Без сортировки', description='Сортировка', enum=['По возрастанию', 'По убыванию', 'Без сортировки'])
-    # type: str = Field('строки', description='Тип сортировки', enum=['строки', 'числа'], alias='_type')
-    # del_digits: bool = Field(False, description='Удалить числа')
-    # only_digits: bool = Field(False, description='Оставить только числа')
-    # delete_substring: str = Field('', description='Удалить подстроку')
-    # del_substr_mode: str = Field('Строго', description='Режим', enum=['Строго', 'Рег. выражение'])
+class Settings(PluginSettingsModel):
+    exclude_symbols: List[str] = Field(default_factory=lambda: ['@', 'https://staff.yandex-team.ru/', '-'])
+    templates_path: Path = Field(Path(__file__).parent.parent.parent.parent/'data/shared/md_generator_templates.json')
 
-class Settings(PluginItemSettings):
-    title: str = Field('Bunker Finder')
-    show: bool = Field(True, description='Show')
+    @classmethod
+    def get_exclude_symbols(cls):
+        inst: Self = cls.from_file(Path(__file__).parent / 'settings.json')
+        return inst.exclude_symbols
 
-    cache_ttl: int = Field(7, description='Cache TTL')
-    base_url: str = Field("http://bunker-api-dot.yandex.net", description='Base URL')
-    url_ver: str = Field("/v2", description='URL Version')
-    node_method: str = Field("get_node", description='Node')
-    node_list: str = Field("get_node_list", description='Node List API method')
-    node_tree: str = Field("get_node_tree", description='Node Tree API method')
-    project: str = Field("/dwh", description='Project')
-    path: str = "/prod/reputter"
+class TemplateModel(BaseModel):
+    name: str = Field()
+    template: str = Field()
+    description: str = Field('')
+    splitter: str = Field('\n,')
+    joiner: str = Field('\n')
+    exclude_symbols: List[str] = Field(default_factory=Settings.get_exclude_symbols)
+
+    @cached_property
+    def words(self):
+        return self.template.split(' ')
+
+class TemplatesListModel(BaseModel):
+    templates: List[TemplateModel] = Field()
+
+    @classmethod
+    def from_file(cls, file_path: Path) -> Self:
+        if not file_path.exists():
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            file_path.touch(exist_ok=True)
+            file_path.write_text(orjson.dumps({'templates': []}).decode(), 'utf-8')
+            return cls.model_validate({'templates': []})
+        data = orjson.loads(file_path.read_text('utf-8'))
+        return cls.model_validate(data)
